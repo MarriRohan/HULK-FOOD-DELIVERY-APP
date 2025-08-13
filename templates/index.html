@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HULK FOOD DELIVERY</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>HULK FOOD DELIVERY</h1>
+        <div class="cart">
+            🛒 <span id="cart-count">0</span>
+        </div>
+        <button id="checkout-btn">Checkout</button>
+    </header>
+
+    <main>
+        <div id="meal-grid"></div>
+    </main>
+
+    <script>
+        const mealGrid = document.getElementById("meal-grid");
+        const cartCount = document.getElementById("cart-count");
+
+        // Fetch and display meals
+        fetch("/meals")
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(meal => {
+                    const card = document.createElement("div");
+                    card.className = "meal-card";
+                    card.innerHTML = `
+                        <img src="${meal.image_url}" alt="${meal.name}">
+                        <h2>${meal.name}</h2>
+                        <p>Protein: ${meal.protein}g</p>
+                        <p>Calories: ${meal.calories} kcal</p>
+                        <button onclick="addToCart(${meal.id})">Add to Cart</button>
+                    `;
+                    mealGrid.appendChild(card);
+                });
+            });
+
+        // Add to cart
+        function addToCart(id) {
+            fetch("/add_to_cart", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                cartCount.textContent = data.cart_count;
+            });
+        }
+
+        // Checkout
+        document.getElementById("checkout-btn").addEventListener("click", () => {
+            fetch("/checkout", { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    cartCount.textContent = 0;
+                });
+        });
+    </script>
+</body>
+</html>
 
